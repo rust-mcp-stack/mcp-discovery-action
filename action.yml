@@ -81,7 +81,7 @@ runs:
         if git diff --staged --quiet; then
           echo "No changes to $FILENAME"
         else
-          git commit -m "Update $FILENAME via mcp-discovery [skip ci]"
+          git commit -m "$CLI_COMMAND $FILENAME via mcp-discovery"
           git push
         fi
 branding:
