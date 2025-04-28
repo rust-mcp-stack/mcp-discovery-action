@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/rust-mcp-stack/mcp-discovery-action/compare/v1.0.1...v1.0.2) (2025-04-28)
+
+
+### Bug Fixes
+
+* branding ([ad41329](https://github.com/rust-mcp-stack/mcp-discovery-action/commit/ad41329c38b1db9963630089b1d97b12750b21e5))
+
 ## [1.0.1](https://github.com/rust-mcp-stack/mcp-discovery-action/compare/v1.0.0...v1.0.1) (2025-04-28)
 
 
