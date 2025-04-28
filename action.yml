@@ -85,5 +85,5 @@ runs:
           git push
         fi
 branding:
-  icon: "link"
-  color: "blue"
+  icon: "aperture"
+  color: "purple"
