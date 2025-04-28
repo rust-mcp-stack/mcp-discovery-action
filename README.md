@@ -2,7 +2,7 @@
 
 A GitHub Action to run the [MCP Discovery](https://github.com/rust-mcp-stack/mcp-discovery) CLI for creating, updating or printing MCP server capability details in a Markdown or other formatted file.
 
-💡 Check out the **rust-mcp-filesystem** [capabilities](https://rust-mcp-stack.github.io/rust-mcp-filesystem/#/capabilities) page for sample output.
+💡 Check out the **rust-mcp-filesystem** [capabilities](https://rust-mcp-stack.github.io/rust-mcp-filesystem/#/capabilities) page for sample output and an example workflow: [mcp-discovery.yml](https://github.com/rust-mcp-stack/rust-mcp-filesystem/blob/main/.github/workflows/mcp-discovery.yml#L44-L49).
 
 ## Overview
 
