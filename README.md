@@ -2,6 +2,8 @@
 
 A GitHub Action to run the [MCP Discovery](https://github.com/rust-mcp-stack/mcp-discovery) CLI for creating, updating or printing MCP server capability details in a Markdown or other formatted file.
 
+💡 Check out the **rust-mcp-filesystem** [capabilities](https://rust-mcp-stack.github.io/rust-mcp-filesystem/#/capabilities) page for sample output.
+
 ## Overview
 
 This action runs the [MCP Discovery](https://github.com/rust-mcp-stack/mcp-discovery) CLI to discover MCP server capabilities and create/update a file with MCP server details (`create` or `update` commands). It supports all CLI options, including built-in templates (`md`, `md-plain`, `html`, `txt`), custom Handlebars template files, or template strings.
@@ -11,7 +13,7 @@ The action downloads the latest version of the CLI binary by default, but you ca
 ## Inputs
 
 | Input                | Description                                                                                      | Required | Default               |
-| -------------------- | ------------------------------------------------------------------------------------------------ | -------- | --------------------- |
+| --- | --- | --- | --- |
 | `command`            | CLI command to run (`create`, `update` or `print`).                                              | Yes      | -                     |
 | `mcp-launch-command` | Command and arguments to launch the MCP server (e.g., `java -jar mcp.jar`).                      | Yes      | -                     |
 | `filename`           | Output file path for `create`/`update` commands (e.g., `docs/mcp-details.md`).                   | No       | `mcp-discovery.md`    |
