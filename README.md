@@ -20,6 +20,7 @@ The action downloads the latest version of the CLI binary by default, but you ca
 | `template`           | Built-in template for output (`md`, `md-plain`, `html`, `txt`).                                  | No       | -                     |
 | `template-file`      | Path to a custom Handlebars template file in the repository.                                     | No       | -                     |
 | `template-string`    | Custom Handlebars template content as a string.                                                  | No       | -                     |
+| `log-level`    | Specifies the logging level for the CLI                                                 | No       | `info`                     |
 | `token`              | Optional GitHub token with content write permission.                                             | No       | `${{ github.token }}` |
 | `version`            | Version of the `mcp-discovery` CLI to use (e.g., `v0.1.2`). Use `latest` for the latest release. | No       | `latest`              |
 

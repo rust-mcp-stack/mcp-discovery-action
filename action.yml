@@ -26,6 +26,10 @@ inputs:
   template-string:
     description: "Custom Handlebars template content as a string"
     required: false
+  log-level:
+    description: "Specifies the logging level for the CLI (default: info)"
+    default: "info"
+    required: false
   version:
     description: "CLI version (e.g., latest or v0.1.2)"
     required: true
@@ -57,6 +61,7 @@ runs:
         TEMPLATE: ${{ inputs.template }}
         TEMPLATE_FILE: ${{ inputs.template-file }}
         TEMPLATE_STRING: ${{ inputs.template-string }}
+        LOG_LEVEL: ${{ inputs.log-level }}
       run: |
         # Build CLI arguments
         ARGS=""
@@ -64,6 +69,7 @@ runs:
         [ -n "$TEMPLATE" ] && ARGS="$ARGS --template \"$TEMPLATE\""
         [ -n "$TEMPLATE_FILE" ] && ARGS="$ARGS --template-file \"$GITHUB_WORKSPACE/$TEMPLATE_FILE\""
         [ -n "$TEMPLATE_STRING" ] && ARGS="$ARGS --template-string \"$TEMPLATE_STRING\""
+        [ -n "$LOG_LEVEL" ] && ARGS="$ARGS --log-level \"$LOG_LEVEL\""
         # Run CLI
         echo "Running: mcp-discovery $CLI_COMMAND $ARGS -- $MCP_LAUNCH_COMMAND"
         eval "mcp-discovery $CLI_COMMAND $ARGS -- $MCP_LAUNCH_COMMAND"
