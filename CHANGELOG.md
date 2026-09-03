@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/rust-mcp-stack/mcp-discovery-action/compare/v1.0.3...v1.1.0) (2026-09-03)
+
+
+### Features
+
+* add streamable HTTP transport, OAuth, and remote template support ([6730048](https://github.com/rust-mcp-stack/mcp-discovery-action/commit/6730048012a109b7f75644c7d86811feb45093a1))
+* add streamable HTTP transport, OAuth, and remote template support ([f0dbfc9](https://github.com/rust-mcp-stack/mcp-discovery-action/commit/f0dbfc9c23fac4d477a98f1c94029bf7dbef9907))
+
 ## [1.0.3](https://github.com/rust-mcp-stack/mcp-discovery-action/compare/v1.0.2...v1.0.3) (2025-04-30)
 
 
