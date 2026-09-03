@@ -11,8 +11,29 @@ inputs:
     description: "CLI command to run (print, create, or update)"
     required: true
   mcp-launch-command:
-    description: "Command and arguments to launch the MCP server (e.g., rust-mcp-filesystem . )"
-    required: true
+    description: "Command and arguments to launch the MCP server (e.g., rust-mcp-filesystem . ). Mutually exclusive with url."
+    required: false
+  url:
+    description: "URL of a remote streamable HTTP MCP server. Mutually exclusive with mcp-launch-command."
+    required: false
+  header:
+    description: "Static HTTP header(s) to send with streamable HTTP requests, one 'Name: Value' per line (repeatable)."
+    required: false
+  client-id:
+    description: "Pre-registered OAuth client id (omit to use dynamic client registration)."
+    required: false
+  client-secret:
+    description: "Pre-registered OAuth client secret."
+    required: false
+  scope:
+    description: "OAuth scope(s) to request."
+    required: false
+  redirect-uri:
+    description: "Redirect URI used by the authorization-code flow."
+    required: false
+  grant:
+    description: "OAuth grant type (client-credentials or authorization-code)."
+    required: false
   filename:
     description: "Output file path for create/update commands"
     default: "mcp-discovery.md"
@@ -21,10 +42,16 @@ inputs:
     description: "Built-in template for output (md, md-plain, html, txt)"
     required: false
   template-file:
-    description: "Path to a custom Handlebars template file"
+    description: "Path to a custom Handlebars template file or folder"
     required: false
   template-string:
     description: "Custom Handlebars template content as a string"
+    required: false
+  template-url:
+    description: "Remote Handlebars template URL (.hbs, .zip, or .tar.gz)"
+    required: false
+  cache-dir:
+    description: "Cache directory for templates fetched with template-url"
     required: false
   log-level:
     description: "Specifies the logging level for the CLI (default: info)"
@@ -57,25 +84,63 @@ runs:
       env:
         CLI_COMMAND: ${{ inputs.command }}
         MCP_LAUNCH_COMMAND: ${{ inputs.mcp-launch-command }}
+        URL: ${{ inputs.url }}
+        HEADER: ${{ inputs.header }}
+        CLIENT_ID: ${{ inputs.client-id }}
+        CLIENT_SECRET: ${{ inputs.client-secret }}
+        SCOPE: ${{ inputs.scope }}
+        REDIRECT_URI: ${{ inputs.redirect-uri }}
+        GRANT: ${{ inputs.grant }}
         FILENAME: ${{ inputs.filename }}
         TEMPLATE: ${{ inputs.template }}
         TEMPLATE_FILE: ${{ inputs.template-file }}
         TEMPLATE_STRING: ${{ inputs.template-string }}
+        TEMPLATE_URL: ${{ inputs.template-url }}
+        CACHE_DIR: ${{ inputs.cache-dir }}
         LOG_LEVEL: ${{ inputs.log-level }}
       run: |
-        # Build CLI arguments
-        ARGS=""
-        [ -n "$FILENAME" ] && ARGS="$ARGS --filename \"$FILENAME\""
-        [ -n "$TEMPLATE" ] && ARGS="$ARGS --template \"$TEMPLATE\""
-        [ -n "$TEMPLATE_FILE" ] && ARGS="$ARGS --template-file \"$GITHUB_WORKSPACE/$TEMPLATE_FILE\""
-        [ -n "$TEMPLATE_STRING" ] && ARGS="$ARGS --template-string \"$TEMPLATE_STRING\""
-        [ -n "$LOG_LEVEL" ] && ARGS="$ARGS --log-level \"$LOG_LEVEL\""
-        # Run CLI
-        echo "Running: mcp-discovery $CLI_COMMAND $ARGS -- $MCP_LAUNCH_COMMAND"
-        eval "mcp-discovery $CLI_COMMAND $ARGS -- $MCP_LAUNCH_COMMAND"
+        set -euo pipefail
+        args=()
+
+        if [ "$CLI_COMMAND" = "create" ] || [ "$CLI_COMMAND" = "update" ]; then
+          if [ -n "$FILENAME" ]; then
+            args+=("--filename" "$FILENAME")
+          fi
+        fi
+
+        [ -n "$TEMPLATE" ] && args+=("--template" "$TEMPLATE")
+        [ -n "$TEMPLATE_FILE" ] && args+=("--template-file" "$GITHUB_WORKSPACE/$TEMPLATE_FILE")
+        [ -n "$TEMPLATE_STRING" ] && args+=("--template-string" "$TEMPLATE_STRING")
+        [ -n "$TEMPLATE_URL" ] && args+=("--template-url" "$TEMPLATE_URL")
+        [ -n "$CACHE_DIR" ] && args+=("--cache-dir" "$CACHE_DIR")
+        [ -n "$LOG_LEVEL" ] && args+=("--log-level" "$LOG_LEVEL")
+
+        if [ -n "$URL" ]; then
+          args+=("--url" "$URL")
+
+          if [ -n "$HEADER" ]; then
+            while IFS= read -r line; do
+              [ -n "$line" ] && args+=("--header" "$line")
+            done <<< "$HEADER"
+          fi
+
+          [ -n "$CLIENT_ID" ] && args+=("--client-id" "$CLIENT_ID")
+          [ -n "$CLIENT_SECRET" ] && args+=("--client-secret" "$CLIENT_SECRET")
+          [ -n "$SCOPE" ] && args+=("--scope" "$SCOPE")
+          [ -n "$REDIRECT_URI" ] && args+=("--redirect-uri" "$REDIRECT_URI")
+          [ -n "$GRANT" ] && args+=("--grant" "$GRANT")
+        fi
+
+        if [ -n "$MCP_LAUNCH_COMMAND" ]; then
+          echo "Running: mcp-discovery $CLI_COMMAND ${args[*]} -- $MCP_LAUNCH_COMMAND"
+          mcp-discovery "$CLI_COMMAND" "${args[@]}" -- $MCP_LAUNCH_COMMAND
+        else
+          echo "Running: mcp-discovery $CLI_COMMAND ${args[*]}"
+          mcp-discovery "$CLI_COMMAND" "${args[@]}"
+        fi
 
     - name: Commit changes
-      if: ${{ inputs.filename != '' }}
+      if: ${{ (inputs.command == 'create' || inputs.command == 'update') && inputs.filename != '' }}
       shell: bash
       env:
         FILENAME: ${{ inputs.filename }}
@@ -87,7 +152,7 @@ runs:
         if git diff --staged --quiet; then
           echo "No changes to $FILENAME"
         else
-          git commit -m "$CLI_COMMAND $FILENAME via mcp-discovery"
+          git commit -m "${{ inputs.command }} $FILENAME via mcp-discovery"
           git push
         fi
 branding:

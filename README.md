@@ -15,12 +15,21 @@ The action downloads the latest version of the CLI binary by default, but you ca
 | Input                | Description                                                                                      | Required | Default               |
 | --- | --- | --- | --- |
 | `command`            | CLI command to run (`create`, `update` or `print`).                                              | Yes      | -                     |
-| `mcp-launch-command` | Command and arguments to launch the MCP server (e.g., `java -jar mcp.jar`).                      | Yes      | -                     |
+| `mcp-launch-command` | Command and arguments to launch the MCP server (e.g., `java -jar mcp.jar`). Mutually exclusive with `url`. | No       | -                     |
+| `url`                | URL of a remote streamable HTTP MCP server. Mutually exclusive with `mcp-launch-command`.        | No       | -                     |
+| `header`             | Static HTTP header(s) for the streamable HTTP transport, one `Name: Value` per line (repeatable). | No       | -                     |
+| `client-id`          | Pre-registered OAuth client id (omit to use dynamic client registration).                         | No       | -                     |
+| `client-secret`      | Pre-registered OAuth client secret.                                                               | No       | -                     |
+| `scope`              | OAuth scope(s) to request.                                                                        | No       | -                     |
+| `redirect-uri`       | Redirect URI used by the `authorization-code` grant.                                              | No       | -                     |
+| `grant`              | OAuth grant type (`client-credentials` or `authorization-code`).                                  | No       | `client-credentials`  |
 | `filename`           | Output file path for `create`/`update` commands (e.g., `docs/mcp-details.md`).                   | No       | `mcp-discovery.md`    |
 | `template`           | Built-in template for output (`md`, `md-plain`, `html`, `txt`).                                  | No       | -                     |
-| `template-file`      | Path to a custom Handlebars template file in the repository.                                     | No       | -                     |
+| `template-file`      | Path to a custom Handlebars template file or folder in the repository.                           | No       | -                     |
 | `template-string`    | Custom Handlebars template content as a string.                                                  | No       | -                     |
-| `log-level`    | Specifies the logging level for the CLI                                                 | No       | `info`                     |
+| `template-url`       | Remote Handlebars template URL (`.hbs`, `.zip`, or `.tar.gz`).                                   | No       | -                     |
+| `cache-dir`          | Cache directory for templates fetched with `template-url`.                                       | No       | -                     |
+| `log-level`          | Specifies the logging level for the CLI.                                                         | No       | `info`                |
 | `token`              | Optional GitHub token with content write permission.                                             | No       | `${{ github.token }}` |
 | `version`            | Version of the `mcp-discovery` CLI to use (e.g., `v0.1.2`). Use `latest` for the latest release. | No       | `latest`              |
 
@@ -82,6 +91,62 @@ jobs:
           command: 'update'
           mcp-launch-command: '[THE COMMAND YOU USE TO START YOUR MCP SERVER]'
           filename: 'README.md'
+```
+
+### Example 3: Discover a remote streamable HTTP MCP server
+
+Connect to a remote server over the Streamable HTTP transport instead of launching a local process. Use `url` in place of `mcp-launch-command`.
+
+```yaml
+name: MCP Discovery (streamable HTTP)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  generate-md:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: rust-mcp-stack/mcp-discovery-action@v1
+        with:
+          version: 'latest'
+          command: 'create'
+          url: 'https://mcp.example.com/mcp'
+          header: |
+            Authorization: Bearer ${{ secrets.MCP_TOKEN }}
+          filename: 'mcp-discovery.md'
+```
+
+### Example 4: OAuth-protected server (client credentials)
+
+```yaml
+      - uses: rust-mcp-stack/mcp-discovery-action@v1
+        with:
+          version: 'latest'
+          command: 'create'
+          url: 'https://mcp.example.com/mcp'
+          grant: 'client-credentials'
+          client-id: ${{ secrets.MCP_CLIENT_ID }}
+          client-secret: ${{ secrets.MCP_CLIENT_SECRET }}
+          scope: 'mcp tools'
+          filename: 'mcp-discovery.md'
+```
+
+### Example 5: Custom template from a remote URL
+
+```yaml
+      - uses: rust-mcp-stack/mcp-discovery-action@v1
+        with:
+          version: 'latest'
+          command: 'create'
+          mcp-launch-command: '[THE COMMAND YOU USE TO START YOUR MCP SERVER]'
+          template-url: 'https://example.com/templates/report.hbs'
+          cache-dir: '/tmp/mcp-template-cache'
+          filename: 'mcp-discovery.md'
 ```
 
 ## Contributing
